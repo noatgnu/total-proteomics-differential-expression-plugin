@@ -1,0 +1,4 @@
+condition_A	condition_B	comparison_label
+DOX-11J	No DOX-DMSO	DOX-11J vs No DOX-DMSO
+DOX-DMSO	No DOX-DMSO	DOX-DMSO vs No DOX-DMSO
+NO DOX 11J	No DOX-DMSO	NO DOX 11J vs No DOX-DMSO

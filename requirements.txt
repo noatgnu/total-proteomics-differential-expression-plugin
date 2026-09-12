@@ -1,0 +1,1 @@
+# No Python dependencies; this plugin runs entirely in R.

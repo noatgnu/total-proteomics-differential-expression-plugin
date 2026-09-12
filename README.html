@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plugin Documentation</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            border-bottom: 2px solid #2196f3;
+            padding-bottom: 10px;
+            color: #1976d2;
+        }
+        h2 {
+            margin-top: 30px;
+            color: #1976d2;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+        h3 {
+            margin-top: 20px;
+            color: #424242;
+        }
+        h4 {
+            color: #616161;
+        }
+        a {
+            color: #2196f3;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        blockquote {
+            border-left: 4px solid #2196f3;
+            margin: 0;
+            padding-left: 15px;
+            color: #666;
+            background: #f5f9fc;
+            padding: 10px 15px;
+            border-radius: 4px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #2196f3;
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        ul, ol {
+            padding-left: 25px;
+        }
+        li {
+            margin: 5px 0;
+        }
+        strong {
+            font-weight: 600;
+            color: #1976d2;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+<h1 id="total-proteomics-differential-expression">Total Proteomics Differential Expression</h1>
+<h2 id="installation">Installation</h2>
+<p><a href="cauldron://install?repo=https%3A%2F%2Fgithub.com%2Fnoatgnu%2Ftotal-proteomics-differential-expression-plugin">⬇️ <strong>Click here to install in Cauldron</strong></a></p>
+<blockquote>
+<p><strong>Repository</strong>: <code>https://github.com/noatgnu/total-proteomics-differential-expression-plugin</code></p>
+</blockquote>
+<p><strong>Manual installation:</strong></p>
+<ol>
+<li>Open Cauldron</li>
+<li>Go to <strong>Plugins</strong> → <strong>Install from Repository</strong></li>
+<li>Paste: <code>https://github.com/noatgnu/total-proteomics-differential-expression-plugin</code></li>
+<li>Click <strong>Install</strong></li>
+</ol>
+<p><strong>ID</strong>: <code>total-proteomics-differential-expression</code><br>
+<strong>Version</strong>: 1.0.0<br>
+<strong>Category</strong>: analysis<br>
+<strong>Author</strong>: CauldronGO Team</p>
+<h2 id="description">Description</h2>
+<p>Group-wise or Perseus-default imputation and limma differential expression for normalised total proteomics data</p>
+<h2 id="runtime">Runtime</h2>
+<ul>
+<li>
+<p><strong>Environments</strong>: <code>r</code></p>
+</li>
+<li>
+<p><strong>Entrypoint</strong>: <code>total_proteomics_differential_expression.R</code></p>
+</li>
+</ul>
+<h2 id="inputs">Inputs</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Label</th>
+<th>Type</th>
+<th>Required</th>
+<th>Default</th>
+<th>Visibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>normalized_matrix_file</code></td>
+<td>Normalised Matrix File</td>
+<td>file</td>
+<td>Yes</td>
+<td>-</td>
+<td>Always visible</td>
+</tr>
+<tr>
+<td><code>annotation_file</code></td>
+<td>Sample Annotation File</td>
+<td>file</td>
+<td>Yes</td>
+<td>-</td>
+<td>Always visible</td>
+</tr>
+<tr>
+<td><code>comparison_file</code></td>
+<td>Comparison File</td>
+<td>file</td>
+<td>Yes</td>
+<td>-</td>
+<td>Always visible</td>
+</tr>
+<tr>
+<td><code>impute_method</code></td>
+<td>Imputation Method</td>
+<td>select (none, group_downshift, perseus_default)</td>
+<td>No</td>
+<td>none</td>
+<td>Always visible</td>
+</tr>
+<tr>
+<td><code>impute_downshift</code></td>
+<td>Imputation Downshift (SD units)</td>
+<td>number (min: 0, step: 0)</td>
+<td>No</td>
+<td>1.8</td>
+<td>Always visible</td>
+</tr>
+<tr>
+<td><code>impute_width</code></td>
+<td>Imputation Width (SD units)</td>
+<td>number (min: 0, step: 0)</td>
+<td>No</td>
+<td>0.3</td>
+<td>Always visible</td>
+</tr>
+<tr>
+<td><code>fdr_cutoff</code></td>
+<td>FDR Cutoff</td>
+<td>number (min: 0, max: 1, step: 0)</td>
+<td>No</td>
+<td>0.05</td>
+<td>Always visible</td>
+</tr>
+<tr>
+<td><code>fc_threshold_log2</code></td>
+<td>Log2 Fold Change Threshold</td>
+<td>number (min: 0, step: 0)</td>
+<td>No</td>
+<td>0.585</td>
+<td>Always visible</td>
+</tr>
+<tr>
+<td><code>target_genes</code></td>
+<td>Target Genes (comma-separated)</td>
+<td>text</td>
+<td>No</td>
+<td>-</td>
+<td>Always visible</td>
+</tr>
+<tr>
+<td><code>top_n_genes</code></td>
+<td>Top Genes per Direction</td>
+<td>number (min: 1, step: 1)</td>
+<td>No</td>
+<td>15</td>
+<td>Always visible</td>
+</tr>
+</tbody>
+</table>
+<h3 id="input-details">Input Details</h3>
+<h4 id="normalised-matrix-file-normalized-matrix-file">Normalised Matrix File (<code>normalized_matrix_file</code>)</h4>
+<p>One of the QC &amp; Normalisation plugin's normalized_<method>.tsv outputs (Protein.Group, Genes, primary_gene, Category, then one column per sample)</p>
+<h4 id="sample-annotation-file-annotation-file">Sample Annotation File (<code>annotation_file</code>)</h4>
+<p>Cauldron sample annotation file. Sample is matched against the matrix's sample columns by exact string, falling back to basename.</p>
+<ul>
+<li><strong>Table Editor</strong>: Enabled with 3 columns
+<ul>
+<li><strong>Columns</strong>:
+<ul>
+<li><code>Sample</code>: Sample (required)
+<ul>
+<li>Sample identifier matching a normalised-matrix column (full raw-file path or basename)</li>
+</ul>
+</li>
+<li><code>Condition</code>: Condition (required)
+<ul>
+<li>Experimental group label</li>
+</ul>
+</li>
+<li><code>BioReplicate</code>: BioReplicate
+<ul>
+<li>Biological replicate identifier (optional)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="comparison-file-comparison-file">Comparison File (<code>comparison_file</code>)</h4>
+<p>Pairwise comparisons: columns condition_A, condition_B, comparison_label. Positive log2FC means condition_A &gt; condition_B.</p>
+<h4 id="imputation-method-impute-method">Imputation Method (<code>impute_method</code>)</h4>
+<p>'group_downshift' pools each Condition group's own samples to compute one mean/sd, then downshifts (group-wise, MNAR-aware). 'perseus_default' computes mean/sd separately for each sample column, matching Perseus's own default mode. 'none' leaves missing values as-is.</p>
+<ul>
+<li><strong>Options</strong>: <code>none</code>, <code>group_downshift</code>, <code>perseus_default</code></li>
+</ul>
+<h4 id="imputation-downshift-sd-units-impute-downshift">Imputation Downshift (SD units) (<code>impute_downshift</code>)</h4>
+<p>How far below the observed mean to centre imputed values, in standard deviations. Perseus default: 1.8.</p>
+<h4 id="imputation-width-sd-units-impute-width">Imputation Width (SD units) (<code>impute_width</code>)</h4>
+<p>Width of the imputed-value distribution, as a fraction of the observed standard deviation. Perseus default: 0.3.</p>
+<h4 id="fdr-cutoff-fdr-cutoff">FDR Cutoff (<code>fdr_cutoff</code>)</h4>
+<p>Adjusted p-value (BH) threshold for significance</p>
+<h4 id="log2-fold-change-threshold-fc-threshold-log2">Log2 Fold Change Threshold (<code>fc_threshold_log2</code>)</h4>
+<p>Minimum |log2 fold change| for significance (default 0.585 = log2(1.5))</p>
+<h4 id="target-genes-comma-separated-target-genes">Target Genes (comma-separated) (<code>target_genes</code>)</h4>
+<p>Optional gene symbols always labelled on every volcano plot and given their own marker abundance panel, regardless of significance. Leave empty to skip marker panels.</p>
+<h4 id="top-genes-per-direction-top-n-genes">Top Genes per Direction (<code>top_n_genes</code>)</h4>
+<p>Number of top up- and down-regulated genes shown in the per-comparison top-genes bar chart</p>
+<h2 id="outputs">Outputs</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>File</th>
+<th>Type</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>differential_results_all</code></td>
+<td><code>DE/DE_all_contrasts.xlsx</code></td>
+<td>data</td>
+<td>xlsx</td>
+<td>Multi-sheet Excel workbook, one sheet per comparison</td>
+</tr>
+<tr>
+<td><code>de_summary_plot</code></td>
+<td><code>DE/DE_up_down_by_contrast.png</code></td>
+<td>plot</td>
+<td>png</td>
+<td>Significant proteins up/down, summarised across all comparisons</td>
+</tr>
+<tr>
+<td><code>pca_plot</code></td>
+<td><code>DE/PCA_after_imputation.png</code></td>
+<td>plot</td>
+<td>png</td>
+<td>PCA of the (imputed, if requested) intensity matrix</td>
+</tr>
+<tr>
+<td><code>target_markers_plot</code></td>
+<td><code>DE/target_markers_panel.png</code></td>
+<td>plot</td>
+<td>png</td>
+<td>Per-gene abundance panel for Target Genes, one facet per gene. Present only when target_genes is set.</td>
+</tr>
+<tr>
+<td><code>curtain_intensity_matrix</code></td>
+<td><code>curtain/curtain_intensity_matrix.tsv</code></td>
+<td>data</td>
+<td>tsv</td>
+<td>Intensity matrix in Curtain's expected column format (Protein IDs, Gene names, ...)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li><strong>R Version</strong>: &gt;=4.0</li>
+</ul>
+<h3 id="r-dependencies-external-file">R Dependencies (External File)</h3>
+<p>Dependencies are defined in: <code>r-packages.txt</code></p>
+<ul>
+<li><code>SummarizedExperiment</code></li>
+<li><code>limma</code></li>
+<li><code>tidyverse</code></li>
+<li><code>ggplot2</code></li>
+<li><code>ggrepel</code></li>
+<li><code>patchwork</code></li>
+<li><code>pheatmap</code></li>
+<li><code>svglite</code></li>
+<li><code>scales</code></li>
+<li><code>writexl</code></li>
+</ul>
+<blockquote>
+<p><strong>Note</strong>: When you create a custom environment for this plugin, these dependencies will be automatically installed.</p>
+</blockquote>
+<h2 id="example-data">Example Data</h2>
+<p>This plugin includes example data for testing:</p>
+<pre><code class="language-yaml">  normalized_matrix_file: examples/normalized_matrix.tsv
+  annotation_file: examples/annotation.txt
+  comparison_file: examples/comparison.txt
+  impute_method: group_downshift
+</code></pre>
+<p>Load example data by clicking the <strong>Load Example</strong> button in the UI.</p>
+<h2 id="usage">Usage</h2>
+<h3 id="via-ui">Via UI</h3>
+<ol>
+<li>Navigate to <strong>analysis</strong> → <strong>Total Proteomics Differential Expression</strong></li>
+<li>Fill in the required inputs</li>
+<li>Click <strong>Run Analysis</strong></li>
+</ol>
+<h3 id="via-plugin-system">Via Plugin System</h3>
+<pre><code class="language-typescript">const jobId = await pluginService.executePlugin('total-proteomics-differential-expression', {
+  // Add parameters here
+});
+</code></pre>
+
+</body>
+</html>

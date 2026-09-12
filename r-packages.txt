@@ -1,0 +1,10 @@
+SummarizedExperiment
+limma
+tidyverse
+ggplot2
+ggrepel
+patchwork
+pheatmap
+svglite
+scales
+writexl

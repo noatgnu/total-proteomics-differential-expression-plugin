@@ -1,0 +1,172 @@
+plugin:
+  id: "total-proteomics-differential-expression"
+  name: "Total Proteomics Differential Expression"
+  description: "Group-wise or Perseus-default imputation and limma differential expression for normalised total proteomics data"
+  version: "1.0.0"
+  author: "CauldronGO Team"
+  category: "analysis"
+  icon: "insights"
+  repository: "https://github.com/noatgnu/total-proteomics-differential-expression-plugin"
+
+runtime:
+  environments: ["r"]
+  entrypoint: "total_proteomics_differential_expression.R"
+
+inputs:
+  - name: "normalized_matrix_file"
+    label: "Normalised Matrix File"
+    type: "file"
+    required: true
+    accept: ".csv,.tsv,.txt"
+    description: "One of the QC & Normalisation plugin's normalized_<method>.tsv outputs (Protein.Group, Genes, primary_gene, Category, then one column per sample)"
+
+  - name: "annotation_file"
+    label: "Sample Annotation File"
+    type: "file"
+    required: true
+    accept: ".csv,.tsv,.txt"
+    description: "Cauldron sample annotation file. Sample is matched against the matrix's sample columns by exact string, falling back to basename."
+    tableColumns:
+      - name: "Sample"
+        label: "Sample"
+        type: "text"
+        required: true
+        description: "Sample identifier matching a normalised-matrix column (full raw-file path or basename)"
+      - name: "Condition"
+        label: "Condition"
+        type: "text"
+        required: true
+        description: "Experimental group label"
+      - name: "BioReplicate"
+        label: "BioReplicate"
+        type: "text"
+        required: false
+        description: "Biological replicate identifier (optional)"
+
+  - name: "comparison_file"
+    label: "Comparison File"
+    type: "file"
+    required: true
+    accept: ".csv,.tsv,.txt"
+    description: "Pairwise comparisons: columns condition_A, condition_B, comparison_label. Positive log2FC means condition_A > condition_B."
+
+  - name: "impute_method"
+    label: "Imputation Method"
+    type: "select"
+    required: false
+    default: "none"
+    options:
+      - "none"
+      - "group_downshift"
+      - "perseus_default"
+    description: "'group_downshift' pools each Condition group's own samples to compute one mean/sd, then downshifts (group-wise, MNAR-aware). 'perseus_default' computes mean/sd separately for each sample column, matching Perseus's own default mode. 'none' leaves missing values as-is."
+
+  - name: "impute_downshift"
+    label: "Imputation Downshift (SD units)"
+    type: "number"
+    required: false
+    default: 1.8
+    min: 0
+    step: 0.1
+    description: "How far below the observed mean to centre imputed values, in standard deviations. Perseus default: 1.8."
+
+  - name: "impute_width"
+    label: "Imputation Width (SD units)"
+    type: "number"
+    required: false
+    default: 0.3
+    min: 0.01
+    step: 0.05
+    description: "Width of the imputed-value distribution, as a fraction of the observed standard deviation. Perseus default: 0.3."
+
+  - name: "fdr_cutoff"
+    label: "FDR Cutoff"
+    type: "number"
+    required: false
+    default: 0.05
+    min: 0.0001
+    max: 1
+    step: 0.005
+    description: "Adjusted p-value (BH) threshold for significance"
+
+  - name: "fc_threshold_log2"
+    label: "Log2 Fold Change Threshold"
+    type: "number"
+    required: false
+    default: 0.585
+    min: 0
+    step: 0.05
+    description: "Minimum |log2 fold change| for significance (default 0.585 = log2(1.5))"
+
+  - name: "target_genes"
+    label: "Target Genes (comma-separated)"
+    type: "text"
+    required: false
+    description: "Optional gene symbols always labelled on every volcano plot and given their own marker abundance panel, regardless of significance. Leave empty to skip marker panels."
+
+  - name: "top_n_genes"
+    label: "Top Genes per Direction"
+    type: "number"
+    required: false
+    default: 15
+    min: 1
+    step: 1
+    description: "Number of top up- and down-regulated genes shown in the per-comparison top-genes bar chart"
+
+outputs:
+  - name: "differential_results_all"
+    path: "DE/DE_all_contrasts.xlsx"
+    type: "data"
+    description: "Multi-sheet Excel workbook, one sheet per comparison"
+    format: "xlsx"
+
+  - name: "de_summary_plot"
+    path: "DE/DE_up_down_by_contrast.png"
+    type: "plot"
+    description: "Significant proteins up/down, summarised across all comparisons"
+    format: "png"
+
+  - name: "pca_plot"
+    path: "DE/PCA_after_imputation.png"
+    type: "plot"
+    description: "PCA of the (imputed, if requested) intensity matrix"
+    format: "png"
+
+  - name: "target_markers_plot"
+    path: "DE/target_markers_panel.png"
+    type: "plot"
+    description: "Per-gene abundance panel for Target Genes, one facet per gene. Present only when target_genes is set."
+    format: "png"
+
+  - name: "curtain_intensity_matrix"
+    path: "curtain/curtain_intensity_matrix.tsv"
+    type: "data"
+    description: "Intensity matrix in Curtain's expected column format (Protein IDs, Gene names, ...)"
+    format: "tsv"
+
+execution:
+  argsMapping:
+    normalized_matrix_file: "--normalized_matrix_file"
+    annotation_file: "--annotation_file"
+    comparison_file: "--comparison_file"
+    impute_method: "--impute_method"
+    impute_downshift: "--impute_downshift"
+    impute_width: "--impute_width"
+    fdr_cutoff: "--fdr_cutoff"
+    fc_threshold_log2: "--fc_threshold_log2"
+    target_genes: "--target_genes"
+    top_n_genes: "--top_n_genes"
+
+  outputDir: "--output_folder"
+
+  requirements:
+    r: ">=4.0"
+    rPackagesFile: "r-packages.txt"
+
+example:
+  enabled: true
+  values:
+    normalized_matrix_file: "examples/normalized_matrix.tsv"
+    annotation_file: "examples/annotation.txt"
+    comparison_file: "examples/comparison.txt"
+    impute_method: "group_downshift"
