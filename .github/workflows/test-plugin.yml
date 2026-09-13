@@ -1,0 +1,89 @@
+name: Test Plugin
+
+"on":
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout plugin repo
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install system dependencies for building cauldron
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev
+
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      - name: Read R package list
+        id: r_pkgs
+        run: |
+          echo "packages<<CAULDRON_PKGS_EOF" >> "$GITHUB_OUTPUT"
+          if [ -f r-packages.txt ]; then
+            awk 'NF' r-packages.txt | sed 's/^/any::/' >> "$GITHUB_OUTPUT"
+          fi
+          echo "CAULDRON_PKGS_EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Install R dependencies
+        if: steps.r_pkgs.outputs.packages != ''
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: ${{ steps.r_pkgs.outputs.packages }}
+
+      - name: Build cauldron CLI and plugin-validator
+        run: |
+          git clone --depth 1 https://github.com/noatgnu/cauldron-go.git /tmp/cauldron-go
+          cd /tmp/cauldron-go
+          mkdir -p frontend/dist/browser resources/licenses
+          echo '<!DOCTYPE html><html><head><title>Placeholder</title></head><body>Placeholder</body></html>' > frontend/dist/browser/index.html
+          echo '[]' > resources/licenses/go-licenses.json
+          echo '[]' > resources/licenses/npm-licenses.json
+          go build -o /usr/local/bin/cauldron .
+          go build -o /usr/local/bin/plugin-validator ./cmd/plugin-validator
+
+      - name: Validate plugin.yaml
+        run: plugin-validator .
+
+      - name: Configure interpreters
+        run: cauldron doctor --configure
+
+      - name: Stage plugin
+        run: |
+          mkdir -p /tmp/cauldron-plugins/total-proteomics-differential-expression
+          cp -r . /tmp/cauldron-plugins/total-proteomics-differential-expression
+
+      - name: List loaded plugin
+        env:
+          CAULDRON_PLUGINS_DIR: /tmp/cauldron-plugins
+        run: cauldron plugin list
+
+      - name: Run plugin with example inputs
+        if: hashFiles('examples/params.json') != ''
+        env:
+          CAULDRON_PLUGINS_DIR: /tmp/cauldron-plugins
+        run: cauldron job run --params-json "$(cat examples/params.json)" total-proteomics-differential-expression
+
+      - name: Resolve output directory
+        if: hashFiles('examples/params.json') != ''
+        run: echo "CAULDRON_OUTPUT_DIR=$HOME/Documents/CauldronOutputs" >> "$GITHUB_ENV"
+
+      - name: Upload plugin output
+        if: hashFiles('examples/params.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-output
+          path: ${{ env.CAULDRON_OUTPUT_DIR }}
+          if-no-files-found: warn

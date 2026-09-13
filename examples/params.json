@@ -1,0 +1,5 @@
+{
+  "normalized_matrix_file": "examples/normalized_matrix.tsv",
+  "annotation_file": "examples/annotation.txt",
+  "comparison_file": "examples/comparison.txt"
+}
