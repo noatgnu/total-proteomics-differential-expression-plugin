@@ -112,6 +112,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
 
   up_col <- "#E8604C"; dn_col <- "#7FB3D3"; ns_col <- "grey75"
 
+  # @step: Loading normalised matrix
   message("Loading normalised matrix...")
   mat_sep <- detect_delimiter(normalized_matrix_file)
   mat_df <- read.table(normalized_matrix_file, sep = mat_sep, header = TRUE,
@@ -125,6 +126,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
   }
   gene_map <- mat_df[, meta_cols]
 
+  # @step: Loading annotation file
   message("Loading annotation file...")
   annotation_df <- read_annotation(annotation_file)
   sample_cols <- match_sample_columns(colnames(mat_df), annotation_df)
@@ -146,6 +148,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
   rownames(norm_mat) <- mat_df$Protein.Group
   colnames(norm_mat) <- sample_cols
 
+  # @step: Loading comparison file
   message("Loading comparison file...")
   comp_sep <- detect_delimiter(comparison_file)
   comparison_df <- read.table(comparison_file, sep = comp_sep, header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
@@ -156,6 +159,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
   }
 
   # ---- imputation (always after normalisation - norm_mat is already normalised) ----
+  # @step: Imputing missing values
   group_vec <- annot[colnames(norm_mat), "group"]
   set.seed(42)
   imputed_mat <- switch(
@@ -168,6 +172,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
   message(paste("Missing values after imputation:", sum(is.na(imputed_mat))))
 
   # ---- PCA ----
+  # @step-if: Running PCA (requires no missing values remaining)
   if (sum(is.na(imputed_mat)) == 0 && nrow(imputed_mat) > 1) {
     pca <- prcomp(t(imputed_mat), scale. = TRUE)
     var_e <- round(100 * pca$sdev^2 / sum(pca$sdev^2), 1)
@@ -185,6 +190,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
   }
 
   # ---- design + comparisons (cell-means limma) ----
+  # @step: Fitting limma design
   message("Preparing limma design...")
   group_f <- factor(annot[colnames(imputed_mat), "group"], levels = group_levels)
   clean_levels <- vapply(group_levels, safe_name, character(1))
@@ -200,6 +206,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
     comparisons[[label]] <- c(comparison_df$condition_A[i], comparison_df$condition_B[i])
   }
 
+  # @step: Running differential expression comparisons
   de_list <- list(); ud_summary <- list()
   for (comp_label in names(comparisons)) {
     condition_A <- safe_name(comparisons[[comp_label]][1])
@@ -298,6 +305,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
                       file.path(output_folder, "DE", "DE_all_contrasts.xlsx"))
 
   # ---- target-gene marker panels (optional) ----
+  # @step-if: Generating target gene marker panels (requires target genes)
   if (!is.null(target_genes) && length(target_genes) > 0) {
     gm <- gene_map
     gm$n_valid <- rowSums(!is.na(norm_mat))[match(gm$Protein.Group, rownames(norm_mat))]
@@ -332,6 +340,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
   }
 
   # ---- curtain exports ----
+  # @step: Writing curtain exports
   curtain_intensity <- cbind(gene_map, as.data.frame(imputed_mat)) |>
     dplyr::rename(`Protein IDs` = Protein.Group, `Gene names` = Genes) |>
     dplyr::select(-primary_gene, -Category)
@@ -346,6 +355,7 @@ run_differential_expression <- function(normalized_matrix_file, annotation_file,
       readr::write_tsv(file.path(output_folder, "curtain", paste0("curtain_DE_", comp_label, ".tsv")))
   }
 
+  # @step: Differential expression complete
   message("Differential expression complete.")
 }
 

@@ -12,6 +12,9 @@ runtime:
   environments: ["r"]
   entrypoint: "total_proteomics_differential_expression.R"
 
+diagram:
+  enabled: true
+
 inputs:
   - name: "normalized_matrix_file"
     label: "Normalised Matrix File"

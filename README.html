@@ -127,6 +127,30 @@
 <strong>Author</strong>: CauldronGO Team</p>
 <h2 id="description">Description</h2>
 <p>Group-wise or Perseus-default imputation and limma differential expression for normalised total proteomics data</p>
+<h2 id="workflow-diagram">Workflow Diagram</h2>
+<pre class="mermaid">flowchart TD
+    Start([Start]) --&gt; step1
+    step1[&quot;Loading normalised matrix&quot;]
+    step1 --&gt; step2
+    step2[&quot;Loading annotation file&quot;]
+    step2 --&gt; step3
+    step3[&quot;Loading comparison file&quot;]
+    step3 --&gt; step4
+    step4[&quot;Imputing missing values&quot;]
+    step4 --&gt; step5
+    step5{&quot;Running PCA (requires no missing values remaining)&quot;}
+    step5 --&gt; step6
+    step6[&quot;Fitting limma design&quot;]
+    step6 --&gt; step7
+    step7[&quot;Running differential expression comparisons&quot;]
+    step7 --&gt; step8
+    step8{&quot;Generating target gene marker panels (requires target genes)&quot;}
+    step8 --&gt; step9
+    step9[&quot;Writing curtain exports&quot;]
+    step9 --&gt; step10
+    step10[&quot;Differential expression complete&quot;]
+    step10 --&gt; End([End])
+</pre>
 <h2 id="runtime">Runtime</h2>
 <ul>
 <li>

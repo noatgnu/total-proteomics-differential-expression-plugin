@@ -23,6 +23,34 @@
 
 Group-wise or Perseus-default imputation and limma differential expression for normalised total proteomics data
 
+
+## Workflow Diagram
+
+```mermaid
+flowchart TD
+    Start([Start]) --> step1
+    step1["Loading normalised matrix"]
+    step1 --> step2
+    step2["Loading annotation file"]
+    step2 --> step3
+    step3["Loading comparison file"]
+    step3 --> step4
+    step4["Imputing missing values"]
+    step4 --> step5
+    step5{"Running PCA (requires no missing values remaining)"}
+    step5 --> step6
+    step6["Fitting limma design"]
+    step6 --> step7
+    step7["Running differential expression comparisons"]
+    step7 --> step8
+    step8{"Generating target gene marker panels (requires target genes)"}
+    step8 --> step9
+    step9["Writing curtain exports"]
+    step9 --> step10
+    step10["Differential expression complete"]
+    step10 --> End([End])
+```
+
 ## Runtime
 
 - **Environments**: `r`
@@ -141,10 +169,10 @@ Dependencies are defined in: `r-packages.txt`
 This plugin includes example data for testing:
 
 ```yaml
-  normalized_matrix_file: examples/normalized_matrix.tsv
   annotation_file: examples/annotation.txt
   comparison_file: examples/comparison.txt
   impute_method: group_downshift
+  normalized_matrix_file: examples/normalized_matrix.tsv
 ```
 
 Load example data by clicking the **Load Example** button in the UI.
